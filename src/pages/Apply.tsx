@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
-import { sendApplicationEmail, testEmailJSConnection, type ApplicationData } from '../lib/emailjs';
-import { CheckCircle, Clock, FileText, AlertTriangle, Mail } from 'lucide-react';
+import { CheckCircle, Clock, FileText, Mail } from 'lucide-react';
 
 const Apply = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error'>('checking');
-  const [connectionError, setConnectionError] = useState<string>('');
   const [formData, setFormData] = useState({
     projectName: '',
     website: '',
@@ -18,78 +15,52 @@ const Apply = () => {
     agreeToPublish: false,
   });
 
-  useEffect(() => {
-    checkConnection();
-  }, []);
-
-  const checkConnection = async () => {
-    try {
-      const result = await testEmailJSConnection();
-      if (result.success) {
-        setConnectionStatus('connected');
-        setConnectionError('');
-      } else {
-        setConnectionStatus('error');
-        setConnectionError(result.message);
-      }
-    } catch (error: any) {
-      setConnectionStatus('error');
-      setConnectionError('Unable to verify email service configuration. Please try again later.');
-      console.error('EmailJS connection test error:', error);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (connectionStatus !== 'connected') {
-      toast.error('Email service is currently unavailable. Please try again later.');
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
-      const applicationData: ApplicationData = {
-        projectName: formData.projectName,
-        website: formData.website,
-        email: formData.email,
-        description: formData.description,
-        launchDate: formData.launchDate,
-        agreeToPublish: formData.agreeToPublish,
-      };
+      const formDataToSend = new FormData();
+      formDataToSend.append('project_name', formData.projectName);
+      formDataToSend.append('website', formData.website);
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('launch_date', formData.launchDate);
+      formDataToSend.append('agree_to_publish', formData.agreeToPublish ? 'Yes' : 'No');
+      formDataToSend.append('form_type', 'Certification Application');
+      formDataToSend.append('submission_date', new Date().toLocaleString());
 
-      console.log('Submitting application via email:', applicationData);
-
-      await sendApplicationEmail(applicationData);
-
-      console.log('Application submitted successfully via email');
-      
-      toast.success('Application submitted successfully! We\'ll be in touch within 5 business days.');
-      
-      // Reset form
-      setFormData({
-        projectName: '',
-        website: '',
-        email: '',
-        description: '',
-        launchDate: '',
-        agreeToPublish: false,
+      const response = await fetch('https://formspree.io/f/meokrovz', {
+        method: 'POST',
+        body: formDataToSend,
+        headers: {
+          'Accept': 'application/json'
+        }
       });
 
-      // Redirect after a delay
-      setTimeout(() => navigate('/'), 3000);
+      if (response.ok) {
+        toast.success('Application submitted successfully! We\'ll be in touch within 5 business days.');
+        
+        // Reset form
+        setFormData({
+          projectName: '',
+          website: '',
+          email: '',
+          description: '',
+          launchDate: '',
+          agreeToPublish: false,
+        });
+
+        // Redirect after a delay
+        setTimeout(() => navigate('/'), 3000);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit application');
+      }
       
     } catch (error: any) {
       console.error('Error submitting application:', error);
-      
-      if (error.message?.includes('network') || error.message?.includes('fetch')) {
-        toast.error('Network error. Please check your connection and try again.');
-      } else if (error.message?.includes('Failed to fetch')) {
-        toast.error('Connection error. Please check your internet connection and try again.');
-      } else {
-        toast.error(error.message || 'Failed to submit application. Please try again or contact support directly.');
-      }
+      toast.error(error.message || 'Failed to submit application. Please try again or contact support directly.');
     } finally {
       setIsSubmitting(false);
     }
@@ -102,68 +73,6 @@ const Apply = () => {
       [e.target.name]: value,
     });
   };
-
-  // Show connection status
-  if (connectionStatus === 'checking') {
-    return (
-      <div className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Checking email service...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (connectionStatus === 'error') {
-    return (
-      <div className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-            <AlertTriangle className="h-12 w-12 text-red-600 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-red-900 mb-2">Email Service Configuration Required</h2>
-            <p className="text-red-700 mb-4">{connectionError}</p>
-            <div className="bg-white rounded-lg p-4 mb-4 text-left">
-              <h3 className="font-semibold text-gray-900 mb-2">To set up EmailJS:</h3>
-              <ol className="list-decimal list-inside text-sm text-gray-700 space-y-1">
-                <li>Create an account at <a href="https://emailjs.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">emailjs.com</a></li>
-                <li>Create an email service (Gmail, Outlook, etc.)</li>
-                <li>Create an email template with the following variables:
-                  <ul className="list-disc list-inside ml-4 mt-1 text-xs">
-                    <li>project_name, website, contact_email</li>
-                    <li>description, launch_date, agree_to_publish</li>
-                    <li>submission_date, to_email</li>
-                  </ul>
-                </li>
-                <li>Add your EmailJS credentials to environment variables:
-                  <ul className="list-disc list-inside ml-4 mt-1 text-xs">
-                    <li>VITE_EMAILJS_SERVICE_ID</li>
-                    <li>VITE_EMAILJS_TEMPLATE_ID</li>
-                    <li>VITE_EMAILJS_PUBLIC_KEY</li>
-                  </ul>
-                </li>
-              </ol>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={checkConnection}
-                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
-              >
-                Try Again
-              </button>
-              <a
-                href="mailto:contact@qverify.org?subject=Certification Application&body=Please include your project details here."
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors inline-flex items-center"
-              >
-                <Mail className="h-4 w-4 mr-2" />
-                Email Us Directly
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="py-16 px-4 sm:px-6 lg:px-8">
@@ -289,7 +198,7 @@ const Apply = () => {
             <button
               type="submit"
               className="w-full bg-indigo-600 text-white py-3 px-6 rounded-md hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
-              disabled={isSubmitting || connectionStatus !== 'connected'}
+              disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center">
