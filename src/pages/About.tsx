@@ -154,7 +154,7 @@ const About = () => {
                 <h3 className="text-2xl font-semibold mb-6">How to Get Involved</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
                   <motion.a
-                    href="https://forms.google.com/qverify-contributor"
+                    href="https://forms.gle/HB5phNtjrdi3K3wu9"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className="flex flex-col items-center bg-white bg-opacity-10 rounded-lg p-6 backdrop-blur-sm hover:bg-opacity-20 transition-all"
