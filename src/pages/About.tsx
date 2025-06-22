@@ -164,7 +164,7 @@ const About = () => {
                   </motion.a>
                   
                   <motion.a
-                    href="https://discord.gg/qverify"
+                    href="https://t.me/qverifyorg"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className="flex flex-col items-center bg-white bg-opacity-10 rounded-lg p-6 backdrop-blur-sm hover:bg-opacity-20 transition-all"
