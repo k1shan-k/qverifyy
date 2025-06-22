@@ -1,9 +1,48 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BookOpen, Calendar, Tag } from 'lucide-react';
 import { motion } from 'framer-motion';
+import toast, { Toaster } from 'react-hot-toast';
 import AnimatedSection from '../components/AnimatedSection';
 
 const Resources = () => {
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [email, setEmail] = useState('');
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubscribing(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('email', email);
+      formData.append('form_type', 'Newsletter Subscription');
+      formData.append('subscription_date', new Date().toLocaleString());
+      formData.append('source', 'Resources Page');
+
+      const response = await fetch('https://formspree.io/f/meokrovz', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        toast.success('Successfully subscribed to our newsletter! Welcome aboard.');
+        setEmail('');
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to subscribe');
+      }
+      
+    } catch (error: any) {
+      console.error('Error subscribing to newsletter:', error);
+      toast.error(error.message || 'Failed to subscribe. Please try again.');
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
+
   const articles = [
     {
       title: "Why Lattice-Based Cryptography Will Rule Post-Quantum Security",
@@ -30,6 +69,7 @@ const Resources = () => {
 
   return (
     <div className="py-16 px-4 sm:px-6 lg:px-8">
+      <Toaster position="top-center" />
       <div className="max-w-7xl mx-auto">
         <AnimatedSection>
           <div className="text-center mb-16">
@@ -87,22 +127,40 @@ const Resources = () => {
             <p className="text-gray-600 mb-6">
               Subscribe to our newsletter for monthly insights on post-quantum cryptography and blockchain security.
             </p>
-            <form className="max-w-md mx-auto">
+            <form onSubmit={handleNewsletterSubmit} className="max-w-md mx-auto">
               <div className="flex gap-4">
                 <input
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
                   className="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  required
+                  disabled={isSubscribing}
                 />
                 <motion.button
                   type="submit"
-                  className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+                  whileHover={{ scale: isSubscribing ? 1 : 1.05 }}
+                  whileTap={{ scale: isSubscribing ? 1 : 0.95 }}
+                  disabled={isSubscribing}
                 >
-                  Subscribe
+                  {isSubscribing ? (
+                    <span className="flex items-center">
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Subscribing...
+                    </span>
+                  ) : (
+                    'Subscribe'
+                  )}
                 </motion.button>
               </div>
+              <p className="text-sm text-gray-500 mt-3">
+                We respect your privacy. Unsubscribe at any time.
+              </p>
             </form>
           </div>
         </AnimatedSection>
