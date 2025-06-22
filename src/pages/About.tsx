@@ -170,7 +170,7 @@ const About = () => {
                     className="flex flex-col items-center bg-white bg-opacity-10 rounded-lg p-6 backdrop-blur-sm hover:bg-opacity-20 transition-all"
                   >
                     <MessageCircle className="h-8 w-8 mb-3" />
-                    <span className="font-semibold">Join Our Discord</span>
+                    <span className="font-semibold">Join Our Telegram</span>
                   </motion.a>
                   
                   <motion.a
@@ -186,7 +186,7 @@ const About = () => {
 
                 <div className="mt-12">
                   <motion.a
-                    href="https://meet.google.com/qverify-office-hours"
+                    href="https://meet.google.com/dbj-wozi-won"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className="inline-flex items-center bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-colors"
