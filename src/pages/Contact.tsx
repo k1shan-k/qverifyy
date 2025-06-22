@@ -189,7 +189,7 @@ const Contact = () => {
               </div>
               <p className="text-gray-600">
                 Qverify Nonprofit Headquarters<br />
-                123 Quantum Way, Suite 456<br />
+                RE<br />
                 Delaware, USA<br />
                 USA, 12001
               </p>
@@ -212,7 +212,7 @@ const Contact = () => {
                 <h3 className="text-lg font-semibold">Phone</h3>
               </div>
               <p className="text-gray-600">
-                <a href="tel:+918012345678" className="text-indigo-600 hover:text-indigo-800">+91-80-1234-5678</a>
+                <a href="tel:+918012345678" className="text-indigo-600 hover:text-indigo-800">+66-64-070-2554</a>
               </p>
             </div>
           </div>
