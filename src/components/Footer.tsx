@@ -30,7 +30,7 @@ const Footer: React.FC = () => {
               <li className="text-gray-600">Delaware, USA</li>
               <li className="text-gray-600">USA, 12001</li>
               <li><a href="mailto:contact@qverify.org" className="text-gray-600 hover:text-indigo-600">contact@qverify.org</a></li>
-              <li><a href="tel:+918012345678" className="text-gray-600 hover:text-indigo-600">+91-80-1234-5678</a></li>
+              <li><a href="tel:+918012345678" className="text-gray-600 hover:text-indigo-600">+66-64-070-2554</a></li>
             </ul>
           </div>
 
